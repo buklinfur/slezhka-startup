@@ -1,0 +1,8 @@
+opencv-python
+torch
+torchvision
+numpy
+ultralytics
+huggingface_hub
+ipywidgets
+tqdm
