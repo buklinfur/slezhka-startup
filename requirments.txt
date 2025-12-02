@@ -3,6 +3,7 @@ torch
 torchvision
 numpy
 ultralytics
-huggingface_hub
 ipywidgets
 tqdm
+deepface
+tf-keras

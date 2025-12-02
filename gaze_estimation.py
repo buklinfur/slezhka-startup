@@ -32,7 +32,7 @@ class yolo_face:
 
     def forward(self, img):
         with torch.no_grad():
-            bboxes = self.model(img)[0].cpu()
+            bboxes = self.model(img, verbose=False)[0].cpu()
         bbox_positions = [bbox.boxes.xyxyn[0] for bbox in bboxes]
         return bbox_positions
     
@@ -47,7 +47,10 @@ class yolo_face:
             crop = image[y_min:y_max, x_min:x_max]
             crop = preprocessor(crop)
             face_crops.append(crop)
-        return torch.concatenate(face_crops)
+        if len(face_crops):
+            return torch.concatenate(face_crops)
+        else:
+            return torch.tensor([])
 
 
 class mobile_gaze:
