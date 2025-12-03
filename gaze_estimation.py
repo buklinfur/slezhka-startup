@@ -87,7 +87,7 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using ' + device)
 
-    unprocessed = cv2.imread('image.png')
+    unprocessed = cv2.imread('examples/image.png')
     img = pre_process(unprocessed).to(device)
   
     face_detector = yolo_face(device)
