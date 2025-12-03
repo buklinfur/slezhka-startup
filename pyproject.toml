@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slezhka_startup"
+version = "0.1.0"
+description = "Emo radar reklama edition"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+authors = [
+  { name = "Команда emo_radar", email = "buklinfur@outlook.com" }
+]
+license = { text = "MIT" }
+
+dependencies = [
+  "opencv-python",
+  "torch",
+  "torchvision",
+  "numpy",
+  "ultralytics",
+  "ipywidgets",
+  "tqdm",
+  "deepface",
+  "tensorflow>=2.12.0"
+]
+
+[project.optional-dependencies]
+
+full = [
+  "opencv-python",
+  "torch",
+  "torchvision",
+  "numpy",
+  "ultralytics",
+  "ipywidgets",
+  "tqdm",
+  "deepface",
+  "tensorflow>=2.12.0",
+  "streamlit",
+  "pytest",
+  "black",
+  "ruff",
+  "isort"
+]
+
+minimal = [
+  "opencv-python",
+  "numpy",
+  "tqdm"
+]
+
+[project.urls]
+"Repository" = "https://github.com/buklinfur/slezhka-startup"
+"Tracker" = "https://github.com/buklinfur/slezhka-startup/issues"
