@@ -7,11 +7,11 @@ name = "slezhka_startup"
 version = "0.1.0"
 description = "Emo radar reklama edition"
 readme = "README.md"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10,<3.14"
 authors = [
   { name = "Команда emo_radar", email = "buklinfur@outlook.com" }
 ]
-license = { text = "MIT" }
+license = "MIT"
 
 dependencies = [
   "opencv-python",

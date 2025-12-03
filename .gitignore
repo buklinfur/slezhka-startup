@@ -2,6 +2,6 @@ __pycache__*
 .vscode
 .venv
 *.diff
-*.egg_info
+*.egg-info
 
 build
