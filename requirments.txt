@@ -1,9 +1,0 @@
-opencv-python
-torch
-torchvision
-numpy
-ultralytics
-ipywidgets
-tqdm
-deepface
-tf-keras
