@@ -39,7 +39,6 @@ def _normalize_bbox(bbox, image_shape):
     arr = np.asarray(arr).astype(float).flatten()
     h, w = image_shape[:2]
 
-    # если значения в диапазоне [0,1] — считаем нормализованными
     if np.all(arr <= 1.0 + 1e-6):
         x1 = int(arr[0] * w)
         y1 = int(arr[1] * h)
@@ -49,7 +48,6 @@ def _normalize_bbox(bbox, image_shape):
         x1, y1, x2, y2 = arr[:4]
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-    # sanitize
     x1 = max(0, min(x1, w - 1))
     y1 = max(0, min(y1, h - 1))
     x2 = max(0, min(x2, w - 1))
@@ -69,16 +67,14 @@ def merge_outputs(image, bbox_list, gaze_tuple, emotion_list) -> List[ModelOutpu
     lens = [len(bbox_list) if bbox_list is not None else 0,
             len(gaze_tuple[0]) if (gaze_tuple is not None and gaze_tuple[0] is not None) else 0,
             len(emotion_list) if emotion_list is not None else 0]
-    # We'll take minimal available count to pair things by index
+
     n = min([l for l in lens if l is not None] + [0])
     if n == 0:
-        # try to handle if there's at least bbox_list
         if bbox_list:
             n = len(bbox_list)
         else:
             return outputs
 
-    # Normalize arrays
     pitch_arr = None
     yaw_arr = None
     if gaze_tuple is not None:
@@ -92,26 +88,21 @@ def merge_outputs(image, bbox_list, gaze_tuple, emotion_list) -> List[ModelOutpu
         bbox = bbox_list[i] if bbox_list is not None and i < len(bbox_list) else None
         bbox_px = _normalize_bbox(bbox, image.shape) if bbox is not None else None
 
-        # confidence: try common patterns
         conf = None
-        # if bbox is object with score attribute / tensor
         try:
             if hasattr(bbox, "score"):
                 conf = float(bbox.score)
         except Exception:
             pass
 
-        # emotion
         emo_scores = None
         emo_label = None
         if emotion_list is not None and i < len(emotion_list):
             emo = emotion_list[i]
-            # DeepFace analyze returns dict possibly with key 'emotion' and 'dominant_emotion'
             if isinstance(emo, dict):
                 emo_scores = emo.get("emotion") or emo.get("scores") or None
                 emo_label = emo.get("dominant_emotion") or emo.get("label") or None
 
-        # gaze
         gaze_val = None
         if pitch_arr is not None and yaw_arr is not None and i < len(pitch_arr) and i < len(yaw_arr):
             gaze_val = (float(pitch_arr[i]), float(yaw_arr[i]))
@@ -141,27 +132,21 @@ def process_frame(frame, face_detector, gaze_detector, emo_classifier, preproces
     Возвращает (list(ModelOutput), timing_info)
     """
     t0 = time.time()
-    # 1) prepare image for face detector: your face_detector.forward expects tensor processed with pre_process
     if preprocessor is None:
-        # try to use default preprocessor from gaze module if available
         try:
             from ..gaze_estimation import pre_process as default_pre
             preprocessor = default_pre
         except Exception:
             preprocessor = None
 
-    # face detection: your implementation expects preprocessed tensor
     try:
         img_tensor = preprocessor(frame).to(next(gaze_detector.model.parameters()).device) if preprocessor is not None else None
     except Exception:
-        # fallback: try to call forward with np array (some YOLO wrappers accept either)
         img_tensor = None
 
-    # Run face detector
     if img_tensor is not None:
         bbox_list = face_detector.forward(img_tensor)
     else:
-        # try passing an np array / cv2 image if detector supports it
         try:
             bbox_list = face_detector.forward(frame)
         except Exception:
@@ -169,24 +154,19 @@ def process_frame(frame, face_detector, gaze_detector, emo_classifier, preproces
 
     t1 = time.time()
 
-    # Make face batch for gaze/emotion
     face_batch = []
     try:
         face_batch = face_detector.make_face_batch(frame, bbox_list, preprocessor)
-        # ensure tensor on device
         if isinstance(face_batch, (list, tuple)):
-            # some impl might return list of tensors
             face_batch = torch.stack(face_batch) if len(face_batch) else torch.tensor([])
     except Exception:
         face_batch = torch.tensor([])
 
     t2 = time.time()
 
-    # Gaze
     gaze_pitch, gaze_yaw = None, None
     try:
         if isinstance(face_batch, (list, tuple)) or (hasattr(face_batch, "shape") and getattr(face_batch, "shape")[0] > 0):
-            # send to device expected by gaze_detector
             try:
                 dev = next(gaze_detector.model.parameters()).device
                 face_batch_device = face_batch.to(dev)
@@ -198,16 +178,12 @@ def process_frame(frame, face_detector, gaze_detector, emo_classifier, preproces
 
     t3 = time.time()
 
-    # Emotions
     emotion_list = None
     try:
-        # emo_classifier.predict expects numpy array or tensor or list
         emotion_list = emo_classifier.predict(face_batch)
     except Exception:
-        # sometimes DeepFace or classifier may want lists of np imgs
         emotion_list = []
         try:
-            # attempt conversion
             fb = _to_numpy(face_batch)
             if fb is not None:
                 for i in range(getattr(fb, 0, fb.shape[0] if hasattr(fb, 'shape') else 0)):
