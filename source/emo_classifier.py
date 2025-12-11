@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from deepface import DeepFace
 
-from gaze_estimation import yolo_face, mobile_gaze, pre_process
+from .gaze_estimation import yolo_face, mobile_gaze, pre_process
 
 
 class EmoClassifier:

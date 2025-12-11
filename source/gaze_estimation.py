@@ -7,11 +7,12 @@ import torch
 
 import numpy as np
 import torch.nn.functional as F
+from pathlib import Path
 
 from ultralytics import YOLO
 from torchvision import transforms
 
-import utils.helpers
+from .utils.helpers import get_model, draw_bbox_gaze
 
 
 def pre_process(image):
@@ -33,7 +34,7 @@ class yolo_face:
     использует yolov8 с кастомными весами для детекции лиц на фото
     """
     def __init__(self, device):
-        model_path = 'weights/yolov8face.pt'
+        model_path = Path(__file__).resolve().parent / "weights" / "yolov8face.pt"
         self.model = YOLO(model_path).to(device)
 
 
@@ -78,8 +79,8 @@ class mobile_gaze:
     """
     использует mobile gaze для оценки направления взгляда
     """
-    def __init__(self, device, model='resnet18', weight='weights/resnet18.pt', bins = 90, binwidth = 4, angle = 180):
-        self.model = utils.helpers.get_model(model, bins, inference_mode=True)
+    def __init__(self, device, model='resnet18', weight='source/weights/resnet18.pt', bins = 90, binwidth = 4, angle = 180):
+        self.model = get_model(model, bins, inference_mode=True)
         state_dict = torch.load(weight, map_location=device)
         self.model.load_state_dict(state_dict)
         self.model.to(device)
@@ -120,14 +121,14 @@ class mobile_gaze:
         bbox_list -> список bbox для этого изображения, который возвращает метод forward класса yolo_face
         """
         for i in range(len(bbox_list)):
-            utils.helpers.draw_bbox_gaze(img, bbox_list[i], pitch[i], yaw[i])
+            draw_bbox_gaze(img, bbox_list[i], pitch[i], yaw[i])
 
 
 if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using ' + device)
 
-    unprocessed = cv2.imread('examples/image.png')
+    unprocessed = cv2.imread('examples/images/image.png')
     img = pre_process(unprocessed).to(device)
   
     face_detector = yolo_face(device)
