@@ -20,6 +20,12 @@ Emo-Radar/
 ├── source/
 │   ├── emo_classifier.py
 │   ├── gaze_estimation.py
+│   ├── stats/
+│   │   ├── __init__.py
+│   │   ├── collector.py
+│   │   ├── datamodel.py
+│   │   └── metrics.py
+│   │   └── realtime.py
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── mobilenet.py
@@ -35,8 +41,8 @@ Emo-Radar/
 │       ├── resnet18.pt
 │       └── yolov8face.pt
 ├── pyproject.toml
-├── README.md
-└── README-examples/
+├── MANIFEST.in
+└── README.md
 ```
 
 ---
@@ -75,6 +81,15 @@ General helper functions:
 ### `weights/`
 
 Pretrained model weights for gaze and face detection.
+
+### `stats/`
+
+Statistics aggregation module:
+
+* `datamodel.py` – model data unified container.
+* `collector.py` – data aggregator.
+* `metrics.py` – metrics calculation.
+* `realtime.py` – util for potential realtime stats computation.
 
 ---
 
@@ -163,12 +178,6 @@ It aims to grow into a modular and robust platform for video-based emotion and g
 The architecture is intentionally modular: face detection, gaze estimation, and emotion recognition can be extended independently.
 
 ---
-
-## Testing
-
-```bash
-pytest -v
-```
 
 Covers:
 
