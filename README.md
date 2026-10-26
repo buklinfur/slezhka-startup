@@ -96,8 +96,8 @@ Statistics aggregation module:
 ## Installation
 
 ```bash
-git clone <repo_url>
-cd Emo-Radar
+git clone https://github.com/buklinfur/slezhka-startup.git
+cd slezhka-startup
 python -m venv .venv
 source .venv/bin/activate  # Linux / macOS
 # or
